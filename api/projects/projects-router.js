@@ -70,6 +70,7 @@ router.post("/", async (req, res) => {
 // update project by id
 router.put("/:id", async (req, res) => {
   try {
+    // parameter extraction
     const { id } = req.params;
     const { name, description, completed } = req.body;
 
@@ -98,6 +99,52 @@ router.put("/:id", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error updating project", error: error.message });
+  }
+});
+
+// delete project by id
+router.delete("/:id", async (req, res) => {
+  try {
+    // parameter extraction
+    const { id } = req.params;
+    
+    // DB query
+    const deletedCount = await Projects.remove(id);
+    
+    if (deletedCount > 0) {
+      res.status(200).end(); // No response body, just 200 status
+    } else {
+      res.status(404).json({ message: "Project not found" });
+    }
+  } catch (error) {
+    console.error("Error in DELETE /api/projects/:id:", error);
+    res
+      .status(500)
+      .json({ message: "Error deleting project", error: error.message });
+  }
+});
+
+// get actions for a specific project
+router.get("/:id/actions", async (req, res) => {
+  try {
+    // parameter extraction
+    const { id } = req.params;
+    
+    // project exists?
+    const project = await Projects.get(id);
+    
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+    
+    // Get actions for this project
+    const actions = await Projects.getProjectActions(id);
+    res.status(200).json(actions);
+  } catch (error) {
+    console.error("Error in GET /api/projects/:id/actions:", error);
+    res
+      .status(500)
+      .json({ message: "Error retrieving project actions", error: error.message });
   }
 });
 
