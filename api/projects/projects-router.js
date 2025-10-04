@@ -74,16 +74,21 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const { name, description, completed } = req.body;
 
-    if (!name || !description) {
+    // Validate required fields - name, description, and completed must all be present
+    if (name === undefined || description === undefined || completed === undefined ||
+        name === null || description === null || completed === null ||
+        name === '' || description === '' ||
+        (typeof name === 'string' && name.trim() === '') ||
+        (typeof description === 'string' && description.trim() === '')) {
       return res.status(400).json({
-        message: "Missing required fields: name and description are required",
+        message: "Missing required fields: name, description, and completed are required",
       });
     }
 
     const changes = {
-      name,
-      description,
-      completed: completed !== undefined ? completed : false,
+      name: typeof name === 'string' ? name.trim() : name,
+      description: typeof description === 'string' ? description.trim() : description,
+      completed: completed,
     };
 
     // DB query
